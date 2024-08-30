@@ -118,6 +118,7 @@ public class AccountServiceImpl implements AccountService {
         return accountRepository.findByAccountNumber(accountNumber)
                 .map(existingAccount -> {
                     existingAccount.setActive(false);
+                    existingAccount.getMovements().forEach(movement -> movement.setActive(false));
                     return accountMapper.toDTO(accountRepository.save(existingAccount));
                 });
 
