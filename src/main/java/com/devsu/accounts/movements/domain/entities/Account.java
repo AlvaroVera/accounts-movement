@@ -49,6 +49,9 @@ public class Account {
     @Column(name = "client_id")
     private Long clientId;
 
+    @Transient
+    private String clientName;
+
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     private List<Movement> movements;

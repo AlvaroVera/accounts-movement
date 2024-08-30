@@ -1,5 +1,6 @@
 package com.devsu.accounts.movements.service.Impl;
 
+import com.devsu.accounts.movements.api.dto.AccountDTO;
 import com.devsu.accounts.movements.api.dto.MovementDTO;
 import com.devsu.accounts.movements.api.exceptions.InsufficientBalanceException;
 import com.devsu.accounts.movements.api.mapper.MovementMapper;
@@ -39,6 +40,7 @@ public class MovementServiceImpl implements MovementService {
     public Optional<MovementDTO> getMovementById(Long movementId) {
         return movementRepository.findById(movementId)
                 .filter(Movement::getActive)
+
                 .map(movementMapper::toDTO);
     }
 

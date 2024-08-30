@@ -1,15 +1,18 @@
 package com.devsu.accounts.movements.api.controllers;
 
 import com.devsu.accounts.movements.api.dto.AccountDTO;
+import com.devsu.accounts.movements.api.dto.StatementDTO;
 import com.devsu.accounts.movements.api.exceptions.ResourceNotFoundException;
 import com.devsu.accounts.movements.service.AccountService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -20,6 +23,15 @@ import java.util.Map;
 public class AccountController {
 
     private final AccountService accountService;
+
+    @GetMapping("/statement")
+    public ResponseEntity<List<StatementDTO>> getStatement(
+            @RequestParam(value = "date-from") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate dateFrom,
+            @RequestParam(value = "date-to") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate dateTo,
+            @RequestParam(value = "client-id") Long clientId
+    ){
+        return ResponseEntity.ok(accountService.getStatement(dateFrom, dateTo, clientId));
+    }
 
     @GetMapping
     public ResponseEntity<List<AccountDTO>> getAllAccounts() {

@@ -1,6 +1,7 @@
 package com.devsu.accounts.movements.service.Impl;
 
 import com.devsu.accounts.movements.api.dto.AccountDTO;
+import com.devsu.accounts.movements.api.dto.StatementDTO;
 import com.devsu.accounts.movements.api.exceptions.ResourceNotFoundException;
 import com.devsu.accounts.movements.api.mapper.AccountMapper;
 import com.devsu.accounts.movements.domain.entities.Account;
@@ -15,7 +16,9 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -33,6 +36,14 @@ public class AccountServiceImpl implements AccountService {
     private final MovementRepository movementRepository;
 
     @Override
+    public List<StatementDTO> getStatement(LocalDate dateFrom, LocalDate dateTo, Long clientId) {
+
+        ClientDTO clientDTO = client.getClientById(clientId);
+        List<Account> accountList = accountRepository.findByClientIdAndMovements_DateBetween(clientId, dateFrom.atStartOfDay(), dateTo.atTime(LocalTime.MAX));
+        return accountMapper.toStatementAccount(clientDTO.getName(), accountList);
+    }
+
+    @Override
     public List<AccountDTO> getAllAccounts() {
         return accountRepository.findAll()
                 .stream().filter(Account::getActive)
@@ -42,8 +53,15 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Optional<AccountDTO> getAccountById(String accountNumber) {
+
+
         return accountRepository.findByAccountNumber(accountNumber)
                 .filter(Account::getActive)
+                .map(account1 -> {
+                    ClientDTO clientDTO = client.getClientById(account1.getClientId());
+                    account1.setClientName(clientDTO.getName());
+                    return account1;
+                })
                 .map(accountMapper::toDTO);
     }
 
@@ -51,11 +69,12 @@ public class AccountServiceImpl implements AccountService {
     @Transactional
     public AccountDTO createAccount(AccountDTO accountDTO) {
 
-Ingl        ClientDTO clientDTO = client.getClientById(accountDTO.getClientId());
+        ClientDTO clientDTO = client.getClientById(accountDTO.getClientId());
 
         if (clientDTO == null){
             throw new ResourceNotFoundException("No se encontro el cliente con el id: " + accountDTO.getClientId());
         }
+
         Account account = accountRepository.save(accountMapper.toEntity(accountDTO));
 
         if (account.getBalance().compareTo(BigDecimal.valueOf(0.0)) > 0) {

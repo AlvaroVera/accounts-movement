@@ -1,14 +1,50 @@
 package com.devsu.accounts.movements.api.mapper;
 
 import com.devsu.accounts.movements.api.dto.AccountDTO;
+import com.devsu.accounts.movements.api.dto.MovementDTO;
+import com.devsu.accounts.movements.api.dto.StatementDTO;
 import com.devsu.accounts.movements.domain.entities.Account;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
+@RequiredArgsConstructor
 public class AccountMapper {
+
+    private final MovementMapper movementMapper;
+
+    public List<StatementDTO> toStatementAccount(String name, List<Account> accountList){
+
+        return accountList.stream()
+                .map(account -> {
+                    StatementDTO statementDTO = new StatementDTO();
+                    statementDTO.setName(name);
+                    statementDTO.setAccountNumber(account.getAccountNumber());
+                    statementDTO.setAccountType(account.getAccountType());
+                    statementDTO.setBalance(account.getBalance());
+                    statementDTO.setPreviousBalance(account.getPreviousBalance());
+                    statementDTO.setMovementList(account.getMovements()
+                            .stream()
+                            .map(movement -> MovementDTO.builder()
+                                    .date(movement.getDate())
+                                    .movementType(movement.getMovementType())
+                                    .amount(movement.getAmount())
+                                    .balance(movement.getBalance())
+                                    .build())
+                            .collect(Collectors.toList()));
+
+                    return statementDTO;
+                })
+                .collect(Collectors.toList());
+
+
+    }
     public AccountDTO toDTO(Account account) {
         if (account == null) {
             return null;
@@ -21,6 +57,7 @@ public class AccountMapper {
         accountDTO.setBalance(account.getBalance());
         accountDTO.setPreviousBalance(account.getPreviousBalance());
         accountDTO.setStatus(account.getStatus());
+        accountDTO.setClientName(account.getClientName());
         accountDTO.setClientId(account.getClientId());
 
         return accountDTO;
@@ -35,7 +72,7 @@ public class AccountMapper {
         account.setAccountNumber(accountDTO.getAccountNumber());
         account.setAccountType(accountDTO.getAccountType());
         account.setBalance(accountDTO.getBalance());
-        account.setPreviousBalance(accountDTO.getPreviousBalance());
+        account.setPreviousBalance(BigDecimal.valueOf(0));
         account.setStatus(accountDTO.getStatus());
         account.setClientId(accountDTO.getClientId());
 

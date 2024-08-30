@@ -18,11 +18,11 @@ public class MovementMapper {
 
         MovementDTO movementDTO = new MovementDTO();
         movementDTO.setMovementId(movement.getMovementId());
-        movementDTO.setAccountId(movement.getAccount().getAccountId());
         movementDTO.setDate(movement.getDate());
         movementDTO.setMovementType(movement.getMovementType());
         movementDTO.setAmount(movement.getAmount());
         movementDTO.setBalance(movement.getBalance());
+        movementDTO.setAccountNumber(movement.getAccount().getAccountNumber());
 
         return movementDTO;
     }
